@@ -1,10 +1,12 @@
 const http = require("http");
 const { URL } = require("url");
 const routes = require("./routes");
+const bodyParser = require("./helpers/bodyParser");
 
 const server = http.createServer((request, response) => {
   const parsedUrl = new URL(`http://localhost:3000${request.url}`);
   let { pathname } = parsedUrl;
+  let id = null;
 
   const splitEndpoint = pathname.split("/").filter(Boolean);
 
@@ -20,13 +22,18 @@ const server = http.createServer((request, response) => {
 
   if (route) {
     request.query = Object.fromEntries(parsedUrl.searchParams); // Transforma Iterable em objeto
-    // request.params = { id };
+    request.params = { id };
     response.send = (statusCode, body) => {
       response.writeHead(statusCode, { "Content-Type": "text/html" });
       response.end(JSON.stringify(body));
     };
 
-    route.handler(request, response);
+    // ARRAY.INCLUDES VERIFICA SE O VALOR ESTÁ DENTRO DO ARRAY
+    if (["POST", "PUT", "PATCH"].includes(request.method)) {
+      bodyParser(request, () => route.handler(request, response));
+    } else {
+      route.handler(request, response);
+    }
   } else {
     response.writeHead(404, { "Content-Type": "text/html" });
     response.end(`Cannot ${request.method} ${parsedUrl.pathname}`);
