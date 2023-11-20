@@ -20,7 +20,7 @@ const server = http.createServer((request, response) => {
 
   if (route) {
     request.query = Object.fromEntries(parsedUrl.searchParams); // Transforma Iterable em objeto
-    request.params = { id };
+    // request.params = { id };
     response.send = (statusCode, body) => {
       response.writeHead(statusCode, { "Content-Type": "text/html" });
       response.end(JSON.stringify(body));
